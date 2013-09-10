@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <!--自适应界面,如果出现,在某些设备出现界面偏小的话,检查一下有没有加入这句 -->
+    <meta http-equiv="Content-type" name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+	<link rel="stylesheet" href="css/index.css" />
+	<link rel="stylesheet" href="css/goods.css" />
+	<link rel="stylesheet" href="css/ideabook.css" />
+	<title>多宝汇</title>
+
+	<style>	
+		.ideabookWall ul{width:100%;overflow:hidden;position:rati}
+		.ideabookWall ul li{width:100%;float:left;}
+	</style>
+</head>
+<body>
+	<div class="loading"></div>
+	<div class="wrapper">
+		<div class="header">
+			<span class="back">返回</span>
+			<h1>多宝汇</h1>
+		</div>
+		<div class="content">
+			<div class="ideabookList">
+				<ul>
+				</ul>
+			</div>
+			<div class="ideabookItem">
+			</div>
+		</div>
+		<div class="footer">
+			<div class="navbar">
+				<ul>
+					<li><a href="index.html"><span>首页</span></a></li>
+					<li><a href="catalog.html"><span>分类</span></a></li>
+					<li><a href="ideabook.html"><span>灵感辑</span></a></li>
+				</ul>
+			</div>
+		</div>	
+	</div>
+	<script type="text/html" id="ideabook">
+		<?$.each(tInfo , function(k , v){?>
+			<a class="showItem" href="javascript:void(0)" book_id="<?= v.book_id?>">
+			<li>
+				<p class="ideabookImg"><img width="60" height="60" src="<?= v.item[0].image?>" /></p>	
+				<p class="ideabookTitle"><?= v.title?></p>	
+				<p class="ideabookDesc"><?= v.item[0].description.substr(0,30)?>...</p>	
+			</li>
+			</a>
+		<?});?>
+	</script>
+	<script type="text/html" id="ideabookItem">
+		<h1><?= ideabookInfo.title?></h1>
+		<?$.each(list , function(k , v){?>
+			<div class="item">		
+				<p><img src="<?= v.image?>"></p>
+				<p><?= v.description?></p>
+			</div>
+		<?});?>
+	</script>
+	<script src="js/zepto.min.js"></script>
+	<script src="js/fastclick.js"></script>
+	<script src="js/config.js"></script>
+	<script src="js/tmpl.js"></script>
+	<script src="js/touch.js"></script>
+
+	<script>
+		var ideabookListWidth = 0;
+		var page = 0;
+		function fixLoadingTop(){
+			$('.loading').show();
+			$('.loading').css({top : ($(window).height() - 16) / 2})
+		}
+		$(function() {
+			$('.content').width($(window).width() * 2);
+			$('.ideabookList , .ideabookItem').width($(window).width());
+			FastClick.attach(document.body);
+			fixLoadingTop();
+			getIdeabook();
+			var wWidth = 0;
+			var scrollTop = 0;
+			$('.content').on('click' , '.showItem' , function(){
+				var book_id = $(this).attr('book_id');
+				window.scrollTo( 0 , scrollTop);
+				$('.ideabookList').animate({'marginLeft' : -$(window).width()} , 300);	
+				$.get(Duobaohui.config.server_url+ '/ideabook/item_list_jsonp' , {'book_id' : book_id} , function(res){
+					var ideabookItem = tmpl('ideabookItem' , res);
+					$('.ideabookItem').html(ideabookItem);
+					$('.back').show();
+					$('.ideabookItem').height('auto');
+				} , 'jsonp');
+			});
+			$('.header').on('click' , '.back' , function(){
+				window.scrollTo( 0 , scrollTop);
+				$('.ideabookList').animate({'marginLeft' : 0} , 300 , function(){
+					$('.ideabookItem').html('');
+				});	
+				$(this).hide();
+			});
+		});
+
+		function getIdeabook(){
+			$.get(Duobaohui.config.server_url+ '/ideabook/index_jsonp' , {'page' : page} , function(res){
+				var ideabook = tmpl('ideabook' , res);
+				$('.ideabookList ul').append(ideabook);
+				$('.loading').hide();
+				$('.content').removeClass('v_hidden');
+				return;
+			} ,  'jsonp');
+		}
+	</script>
+</body>
+</html>

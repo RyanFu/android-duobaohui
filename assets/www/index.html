@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <!--自适应界面,如果出现,在某些设备出现界面偏小的话,检查一下有没有加入这句 -->
+    <meta http-equiv="Content-type" name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+	<link rel="stylesheet" href="css/duobaohui.css" />
+	<link rel="stylesheet" href="css/goods.css" />
+	<link rel="stylesheet" href="css/index.css" />
+	<script src="js/config.js"></script>
+	<script src="js/tmpl.js"></script>
+	<script src="js/jquery-2.0.2.min.js"></script>
+	<script src="js/jquery.mobile-1.3.1.min.js"></script>
+	<script>
+		$( document ).bind( "mobileinit", function() {
+			$.mobile.allowCrossDomainPages = true;
+			$.support.cors = true;
+		});
+	</script>
+	<title>多宝汇</title>
+</head>
+<body>
+	
+	<div class="wrapper">
+		<div class="header">
+			<span class="goBack">返回</span>
+			<h1>多宝汇</h1>
+		</div>
+		<div class="loading"></div>
+		<div id="index" class="content" data-role="page">
+			<div class="posterCloum1">
+			</div>
+			<div class="posterCloum2">
+			</div>
+			<div class="clear"></div>
+			<div class="loadMore button"><a href="javascript:void(0)" data-role="button">点击加载更多</a></div>
+			<script type="text/html" id="poster">	
+				<div class="poster">
+				<div class="poster_grid">
+				<div class="poster_img" goods_id="<?= key?>">
+					<a href="javascript:void(0)" class="click_to_goods"><img width="<?= poster_width2?>" height="<?=poster_height2?>"  src="<?= show_pic || ginfo.goods_pic_url?>?imageMogr/thumbnail/<?= poster_width2?>" alt="<?= goods_title?>" /></a>
+					<p class="price"><?= ginfo.goods_price?></p>
+				</div>
+				<div class="poster_content">
+					<p><?= html_content || goods_title?></p>
+				</div>
+				</div>
+				</div>
+			</script>
+			<script type="text/html" id="single_goods_tmp">
+			<div class="goodsList">
+				<div id="goods_content">
+					<div class="poster_img">
+						<div class="details_btn_return"><a href="javascript:void(0)" class="canel_single_goods" ><img width="40" src="css/images/details_btn_return.png" /></a></div>
+						<div class="goods_single_img" style="width:<?= poster_width?>px">
+							<img width="<?= poster_width?>" height="<?= poster_height?>" src="<?= show_pic || ginfo.goods_pic_url?>?imageMogr/thumbnail/<?= poster_width?>">
+							<div class="goods_title"><?= goods_title?></div>
+						</div>
+						<div class="clear"></div>
+						<div class="goods_repin">
+							<p class="userInfo_avatar"><img src="<?= uinfo.avatar_c?>?imageView/2/w/32"></p>
+							<p class="html_content"><?=uinfo.nickname?> : <?= html_content || repin?></p>
+						</div>
+
+						<div class="clear"></div>
+						<div class="goods_go_buy">
+							<a style="color:#fff;font-weight:normal;"href="javascript:void(0)" class="go_buy" taobao_item_id="<?=taobao_item_id ?>">￥<?= ginfo.goods_price?> | 去购买</a>
+						</div>
+						<div class="goods_comment">
+						</div>
+					</div>
+				</div>
+			</div>
+		</script>
+
+		</div>
+		<div id="catalog" data-role="page" class="content">
+			<link rel="stylesheet" href="css/index.css" />
+			<link rel="stylesheet" href="css/catalog.css" />
+			<div class="leftBar">
+			</div>
+			<div class="rightBar">
+			</div>
+			<script type="text/html" id="navList">
+				<ul class="navList">
+					<?$.each(list , function(k , v){?>
+						<?if(v.e_name != 'hot'){?>
+							<li><a class="jumpAttr" url_name="<?=v.e_name?>" href="javascript:void(0)"><?= v.name?></a></li>
+						<?}?>
+					<?});?>
+				</ul>
+			</script>
+			<script type="text/html" id="attrList">
+				<div class="search" data-role="fieldcontain">
+					<input type="text" value="" placeholder="搜你喜欢" class="search_key" />
+					<input type="button" value="搜索" class="search_btn">
+				</div>
+				<ul class="attrList">
+					<? var hasChild = hasChild || hasChild;
+					   var noChild = noChild || noChild;
+					?>
+					<?if(hasChild){?>
+						<?$.each(hasChild , function(k ,v){?>
+							<div class="clear"></div>
+							<li style="width:100%;text-align:left;"><a href="index.html?url_name=<?= v.sn_name?>"><?= v.name?></a></li>
+							<div class="clear"></div>
+							<?$.each(v.child , function(k,v){?>
+								<li><p><a class="goToCatalog" href="javascript:void(0)" sn_name="<?= v.sn_name?>"><img width="64" height="64" src="<?= v.img?>?imageMogr/thumbnail/64"></a></p><a href="index.html?url_name=<?= v.sn_name?>"><?= v.name?></a></li>
+							<?});?>
+						<?});?>
+					<?}?>
+					<?if(noChild){?>
+						<div class="clear"></div>
+						<?$.each(noChild , function(k,v){?>
+							<li><p><a href="index.html?url_name=<?= v.sn_name?>"><img width="64" height="64" src="<?= v.img?>?imageMogr/thumbnail/64"></a></p><a href="index.html?url_name=<?= v.sn_name?>"><?= v.name?></a></li>
+						<?});?>
+					<?}?>
+				</ul>
+			</script>
+			<script>
+				$('#catalog').bind('pageinit' , function(){
+				$('.wrapper').on('click' , '.search_btn' , function(){
+					$.mobile.changePage('#index');
+					page = 0;
+					frame = 0;
+					search_key = $('.search_key').val(); 
+					isSearch = true;
+					$('.posterCloum1,.posterCloum2').empty();
+					window.setTimeout(function(){
+					getSearchData();
+					} , 200);
+
+				});
+
+				$('.wrapper').on('click' , '.goToCatalog' , function(){
+					$.mobile.changePage('#index');
+					page = 0;
+					frame = 0;
+					sn_name = $(this).attr('sn_name');
+					$('.posterCloum1,.posterCloum2').empty();
+					window.setTimeout(function(){
+					getPosterData();
+					} , 200);
+
+				});
+				$.get(Duobaohui.config.server_url + '/index/navigation_jsonp' , {} , function(res){
+					var data = {};
+					data.list = res;
+					var navList = tmpl('navList' , data);
+					$('.leftBar').html(navList);
+					$('.jumpAttr').eq(0).addClass('active');
+				} , 'jsonp');
+				$('.wrapper').on('click' , '.jumpAttr' , function(res){
+					var url_name = $(this).attr('url_name');
+					$('.jumpAttr').removeClass('active');
+					$(this).addClass('active');
+					getAttrReco(url_name);
+				});
+				function getAttrReco(url_name){
+					$.get(Duobaohui.config.server_url + '/goods/attribute_keywords_recommend_jsonp' , {'url_name' : url_name} , function(res){
+						var attrList = tmpl('attrList' , res);
+						$('.rightBar').html(attrList);
+						$('.loading').hide();
+						$('.content').removeClass('v_hidden');
+					} , 'jsonp');	
+				}
+				getAttrReco('sleep');
+				})
+
+			</script>
+
+		</div>
+		<div id="ideabookItem" data-role="page" class="content">
+			<script type="text/html" id="ideabookItemTmp">
+				<h1><?= ideabookInfo.title?></h1>
+				<?$.each(list , function(k , v){?>
+					<div class="item">		
+						<?var width = v.img_width > $(window).width() ? $(window).width() : v.img_width;?>
+						<p><img src="<?= v.image?>?imageMogr/thumbnail/<?= width?>" width="<?=width?>"></p>
+						<p><?= v.description?></p>
+					</div>
+				<?});?>
+			</script>
+			<div class="ideabookItem">
+			</div>
+		</div>
+		<div id="ideabook" data-role="page" class="content">
+			<link rel="stylesheet" href="css/ideabook.css" />
+			<div class="ideabookList">
+				<ul>
+				</ul>
+			</div>
+			<script type="text/html" id="ideabookTmp">
+				<?$.each(tInfo , function(k , v){?>
+					<a class="showItem" href="javascript:void(0)" book_id="<?= v.book_id?>">
+					<li>
+					<? 
+						var resWidth = v.item[0].img_width * 0.7;
+						var resHeight = v.item[0].img_height * 0.7;
+					?>
+					<p class="ideabookImg"><img height="64" src="<?= v.item[0].image?>?imageMogr/crop/<?= resWidth + 'x' + resHeight?>" /></p>	
+						<p class="ideabookTitle"><?= v.title?></p>	
+						<p class="ideabookDesc"><?= v.item[0].description.substr(0,30)?>...</p>	
+					</li>
+					</a>
+				<?});?>
+			</script>
+			<script>
+			$('#ideabook').bind('pageinit' , function(){
+				$('.loading').show();
+				var page = 0;
+				getIdeabook();
+				$('.content').on('click' , '.showItem' , function(){
+					$('.header .goBack').show();
+					var book_id = $(this).attr('book_id');
+					$.get(Duobaohui.config.server_url+ '/ideabook/item_list_jsonp' , {'book_id' : book_id} , function(res){
+						var ideabookItem = tmpl('ideabookItemTmp' , res);
+						$('.ideabookItem').html(ideabookItem);
+						$.mobile.changePage('#ideabookItem' , {transition:'slide'});
+					} , 'jsonp');
+				});
+
+				function getIdeabook(){
+					$.get(Duobaohui.config.server_url+ '/ideabook/index_jsonp' , {'page' : page} , function(res){
+						var ideabook = tmpl('ideabookTmp' , res);
+						$('.ideabookList ul').append(ideabook);
+						$('.loading').hide();
+					} ,  'jsonp');
+				}
+			})
+			</script>
+		</div>
+		<div id="single_goods" data-role="page" class="single_goods content">
+		</div>
+		<div id="single_goods_slide" data-role="page" class="single_goods content">
+		</div>
+		<div class="footer">
+			<div class="navbar">
+				<ul>
+					<a class="goToIndex" href="javascript:void(0)"><li><span class="active">最热</span></li></a>
+					<a href="#catalog" data-transition="none"><li><span>分类</span></li></a>
+					<a href="#ideabook"data-transition="none"><li><span>灵感辑</span></li></a>
+				</ul>
+			</div>
+		</div>	
+
+		<div id="taoShop" data-role="page" class="go_tao_shop">
+			<div class="taobao_browser"><span class="go_back">返回</span><h1>手机淘宝</h1></div>
+			<div class="iframeShop"></div>
+		</div>
+
+	</div>
+
+	<script>
+		var swipeSteup = 0;
+		var switchTap = 1;
+		var goods_id = 0;
+		var backIndex = -1;
+		bindSwipe();
+		function bindSwipe(){
+			$('.single_goods,.single_goods_slide').bind('swipeleft' ,function(){
+				if(swipeSteup){
+					goods_id = +goods_id + 1;
+					if(!posterData[goods_id + 1]){
+						if(isSearch){
+							getSearchData(true);
+						}else{
+							getPosterData(true);
+						}
+					}
+					if(switchTap){
+						getGoods(goods_id , switchTap); 
+						$.mobile.changePage('#single_goods_slide' , {transition : 'slide'});
+						switchTap = 0;	
+					}else{
+						getGoods(goods_id , switchTap); 
+						$.mobile.changePage('#single_goods' , {transition : 'slide'});
+						switchTap = 1;
+					}	
+					backIndex -= 1;
+				}	
+			});
+			$('.single_goods,.single_goods_slide').bind('swiperight' , function(){
+				if(swipeSteup){
+					if(goods_id == 0){
+						alert('已经是第一个了!');
+						return false;
+					}
+					goods_id = +goods_id - 1;
+					if(switchTap){
+						getGoods(goods_id , switchTap); 
+						$.mobile.changePage('#single_goods_slide' , {transition : 'slide' , reverse : 'true'});
+						switchTap = 0;	
+					}else{
+						getGoods(goods_id , switchTap); 
+						$.mobile.changePage('#single_goods' , {transition : 'slide' , reverse : 'true'});
+						switchTap = 1;
+					}	
+					backIndex -= 1;
+				}	
+			});
+		}
+		$(document).on('click' , '.goBack' , function(){
+			$('.header .goBack').hide();
+			window.history.go(-1);
+			swipeSteup = 0;
+		});
+		$('.footer a').bind('click' , function(){
+			$('.footer span').removeClass('active');
+			$(this).find('span').addClass('active');
+		});
+		$(document).on('click' , '.canel_single_goods' , function(){
+			swipeSteup = 0;
+			window.history.go(backIndex);
+//			$.mobile.changePage('#index')
+		});
+
+		$(document).on('click' , '.goToIndex' , function(){
+			$.mobile.changePage('#index' , {transition : 'none'});
+			if(sn_name != '' || search_key != ''){
+				$('.posterCloum1,.posterCloum2').empty();
+				page = 0;
+				frame = 0;
+				sn_name = '';
+				search_key = '';
+				isSearch = false;
+				getPosterData();
+			}
+		})
+		$('#index').bind('pageinit' , function(){ 
+		$('.wrapper').on('click' , '.go_buy' , function(){
+			var iframe = document.createElement('iframe');
+			iframe.src = 'http://www.duobaohui.com/go/?t='+$(this).attr('taobao_item_id');
+			$('.iframeShop').html(iframe);
+			$.mobile.changePage('#taoShop');
+		});
+		$('.wrapper').on('click' , '.go_back' , function(){
+			$.mobile.changePage('#index');
+		});
+
+		getPosterData();
+		$('.loadMore').bind('click' , function(){
+			if(isSearch){
+				getSearchData();
+			}else{
+				getPosterData();	
+			}
+		});
+		// 单宝数据
+		$('.wrapper').on('click' , '.click_to_goods' , function(){
+			backIndex = -1;
+			goods_id = $(this).parent().attr('goods_id');
+			getGoods(goods_id); 
+			$.mobile.changePage('#single_goods' , {transition : 'none'});
+			swipeSteup = 1;
+		});
+			// 海报墙数据
+
+		});
+	</script>
+
+	<script type="text/javascript">
+		var page = 0;
+		var frame = 0;
+		var sn_name = '';
+		var posterData = {};
+		var search_key = '';
+		var isSearch = false;
+		function getGoods(tid , slide){
+			var res = posterData[tid];
+			if(!res){
+				return false;
+			}
+			var pWidth = res.poster_width > $(window).width() ? $(window).width() : res.poster_width; 
+			res.poster_height = Math.floor(res.poster_height * (pWidth / res.poster_width));
+			res.poster_width = pWidth;
+			var single_goodsTmp = tmpl('single_goods_tmp' , res);
+			if(slide){
+				$('#single_goods_slide').html(single_goodsTmp);
+			}else{
+				$('#single_goods').html(single_goodsTmp);
+			}
+		};
+		function getSearchData(loadData){
+			$('.loadMore a').html('加载中...');
+			$.get(Duobaohui.config.server_url + '/index/search_jsonp' , {'page' : page , 'frame' : frame , 'searchKey' : search_key} , function(res){
+				var wWidth = $(window).width();
+				$.each(res.tInfo , function(k , v){
+					if(loadData){
+						posterData[k] = v;
+					}else{
+						posterData[k] = v;
+						v.key = k;
+						var pWidth = Math.floor($('.posterCloum1').width() * 0.95);
+						if(v.poster_width != null){
+							pWidth  = v.poster_width > pWidth ? pWidth : v.poster_width;
+							v.poster_height2 = Math.floor(v.poster_height * (pWidth / v.poster_width));
+							v.poster_width2 = pWidth;
+							if($('.posterCloum1').height() < $('.posterCloum2').height()){
+								var poster = tmpl('poster' , v);	
+								$('.posterCloum1').append(poster);
+								}else{
+								var poster = tmpl('poster' , v);	
+								$('.posterCloum2').append(poster);
+							}
+						}
+					}
+				});
+				$('.loading').hide();
+				$('.content').removeClass('v_hidden');
+				$('.loadMore a').html('点击加载更多...');
+				frame += 1;
+				isPosterLoad = true;
+				if(frame>=7){
+					frame = 0;
+					page += 1;
+				}
+			} ,  'jsonp');
+		}
+		function getPosterData(loadData){
+			$('.loadMore a').html('加载中...');
+			$.get(Duobaohui.config.server_url + '/index/guang_jsonp' , {'page' : page , 'frame' : frame , 'url_name' : sn_name} , function(res){
+				var wWidth = $(window).width();
+				$.each(res.tInfo , function(k , v){
+					if(loadData){
+						posterData[k] = v;
+					}else{
+						posterData[k] = v;
+						v.key = k;
+						var pWidth = Math.floor($('.posterCloum1').width() * 0.95);
+						if(v.poster_width != null){
+							pWidth  = v.poster_width > pWidth ? pWidth : v.poster_width;
+							v.poster_height2 = Math.floor(v.poster_height * (pWidth / v.poster_width));
+							v.poster_width2 = pWidth;
+							if($('.posterCloum1').height() < $('.posterCloum2').height()){
+								var poster = tmpl('poster' , v);	
+								$('.posterCloum1').append(poster);
+								}else{
+								var poster = tmpl('poster' , v);	
+								$('.posterCloum2').append(poster);
+							}
+						}
+					}
+				});
+				$('.loading').hide();
+				$('.content').removeClass('v_hidden');
+				$('.loadMore a').html('点击加载更多...');
+				frame += 1;
+				isPosterLoad = true;
+				if(frame>=7){
+					frame = 0;
+					page += 1;
+				}
+			} ,  'jsonp');
+		}
+
+	</script>
+</body>
+</html>
